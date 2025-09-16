@@ -84,32 +84,32 @@ sequenceDiagram
 
 ### 3) Simulcast + layer selection (Video quality adaptation)
 ```mermaid
-sequenceDiagram
-    actor Publisher
-    participant LiveKit_SFU as LiveKit SFU
-    participant Subscriber1 as Subscriber 1 (Good Network)
-    participant Subscriber2 as Subscriber 2 (Poor Network)
+    sequenceDiagram
+        actor Publisher
+        participant LiveKit_SFU as LiveKit SFU
+        participant Subscriber1 as Subscriber 1 (Good Network)
+        participant Subscriber2 as Subscriber 2 (Poor Network)
 
-    Publisher->>+LiveKit_SFU: Connects and starts publishing media
-    Note over Publisher,LiveKit_SFU: Publisher encodes video into multiple quality layers (L0, L1, L2) and sends them as RTP streams.
+        Publisher->>+LiveKit_SFU: Connects and starts publishing media
+        Note over Publisher,LiveKit_SFU: Publisher encodes video into multiple quality layers (L0, L1, L2) and sends them as RTP streams.
 
-    loop Simulcast Streams
-        Publisher->>LiveKit_SFU: Sends Simulcast Layer L0 (low quality)
-        Publisher->>LiveKit_SFU: Sends Simulcast Layer L1 (medium quality)
-        Publisher->>LiveKit_SFU: Sends Simulcast Layer L2 (high quality)
-    end
+        loop Simulcast Streams
+            Publisher->>LiveKit_SFU: Sends Simulcast Layer L0 (low quality)
+            Publisher->>LiveKit_SFU: Sends Simulcast Layer L1 (medium quality)
+            Publisher->>LiveKit_SFU: Sends Simulcast Layer L2 (high quality)
+        end
 
-    LiveKit_SFU->>+Subscriber1: Forwards media stream
-    Note right of LiveKit_SFU: LiveKit SFU assesses Subscriber 1's bandwidth and determines it can handle high quality.
-    LiveKit_SFU->>Subscriber1: Selects and sends Layer L2 (high)
+        LiveKit_SFU->>+Subscriber1: Forwards media stream
+        Note right of LiveKit_SFU: LiveKit SFU assesses Subscriber 1's bandwidth and determines it can handle high quality.
+        LiveKit_SFU->>Subscriber1: Selects and sends Layer L2 (high)
+        deactivate Subscriber1
 
-    LiveKit_SFU->>+Subscriber2: Forwards media stream
-    Note right of LiveKit_SFU: LiveKit SFU assesses Subscriber 2's bandwidth and determines it can only handle low quality.
-    LiveKit_SFU->>Subscriber2: Selects and sends Layer L0 (low)
+        LiveKit_SFU->>+Subscriber2: Forwards media stream
+        Note right of LiveKit_SFU: LiveKit SFU assesses Subscriber 2's bandwidth and determines it can only handle low quality.
+        LiveKit_SFU->>Subscriber2: Selects and sends Layer L0 (low)
+        deactivate Subscriber2
 
-    deactivate Publisher
-    deactivate Subscriber1
-    deactivate Subscriber2
+        deactivate LiveKit_SFU
 ```
 
 ---
