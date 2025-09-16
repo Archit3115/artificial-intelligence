@@ -13,52 +13,47 @@ This document describes a production-ready architecture for a real-time voice ag
 The diagram below shows the high-level components and main data flows.
 
 ```mermaid
-flowchart TD
-  subgraph ClientApp[Client Application - Web & Mobile]
-    A[User Browser / App]
-    SDK[LiveKit Client SDK]
-    A --> SDK
+graph TD
+  subgraph ClientApp
+    C1[User]
+    C2[LiveKit SDK]
+    C1 --> C2
   end
 
-  subgraph Backend[Backend Infrastructure]
-    B[Application Server]
-    C[Auth Service]
-    D[AI Agent]
-    E[ElevenLabs Adapter]
-    F[LiveKit Management API]
-    B --> C
-    B --> D
-    D --> E
-    B --> F
+  subgraph Backend
+    B1[App Server]
+    B2[Auth]
+    B3[AI Agent]
+    B4[ElevenLabs]
+    B5[LiveKit API]
+    B1 --> B2
+    B1 --> B3
+    B3 --> B4
+    B1 --> B5
   end
 
-  subgraph LiveKit[LiveKit Platform]
-    G[LiveKit SFU]
-    H[API / Webhooks]
-    I[Egress / Ingress]
-    G --> I
+  subgraph LiveKit
+    L1[SFU]
+    L2[API]
+    L3[Egress]
+    L1 --> L3
   end
 
-  subgraph External[External Services]
-    J[ElevenLabs API]
+  subgraph External
+    E1[ElevenLabs API]
   end
 
-  %% Connections
-  SDK -->|WSS token| G
-  C -->|Access token| SDK
-  SDK -->|publish tracks| G
-  G -->|subscribe tracks| SDK
+  C2 -->|WSS token| L1
+  B2 -->|token| C2
+  C2 -->|publish| L1
+  L1 -->|subscribe| C2
 
-  F --> H
-  H --> G
-  D -->|publish AI audio| G
-  E -->|HTTP/WS| J
-  J --> E
+  B5 --> L2
+  L2 --> L1
+  B3 -->|AI audio| L1
+  B4 -->|HTTP| E1
+  E1 --> B4
 
-  classDef client fill:#E3F2FD,stroke:#0D47A1;
-  classDef server fill:#E8F5E9,stroke:#1B5E20;
-  classDef infra fill:#FFF3E0,stroke:#E65100;
-  classDef storage fill:#F3E5F5,stroke:#6A1B9A;
 ```
 
 ## Component notes
