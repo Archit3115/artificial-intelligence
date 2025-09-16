@@ -3,7 +3,7 @@ title: LiveKit Architecture
 ---
 # LiveKit Architecture
 
-This file contains a single Mermaid `flowchart` that visualizes a typical LiveKit deployment. The diagram shows clients, signaling, SFU routing, NAT traversal (TURN/STUN), recording/ingest, storage, and optional streaming paths.
+This file contains a single Mermaid `flowchart` that visualizes a typical LiveKit deployment. The diagram shows clients, signaling, SFU routing, NAT traversal, recording/ingest, storage, and optional streaming paths.
 
 ```mermaid
 flowchart LR
@@ -15,15 +15,15 @@ flowchart LR
 
   subgraph LiveKit_Server
     direction TB
-    Sig[Signaling (WSS / WebSocket)]:::server
-    S[SFU Router (media plane)]:::server
-    Recorder[Recording / RTMP Ingest]:::server
+    Sig[Signaling - WSS]:::server
+    S[SFU Router]:::server
+    Recorder[Recording & RTMP]:::server
     Storage[(Object Storage)]:::storage
   end
 
   subgraph Network
-    TURN[TURN / STUN (NAT traversal)]:::infra
-    CDN[CDN / RTMP / Streaming]:::infra
+    TURN[TURN-STUN]:::infra
+    CDN[CDN / Streaming]:::infra
   end
 
   A -->|WSS| Sig
@@ -41,7 +41,6 @@ flowchart LR
   classDef infra fill:#FFF3E0,stroke:#E65100;
   classDef storage fill:#F3E5F5,stroke:#6A1B9A;
 
-  click Sig "https://docs.livekit.io/architecture/overview" "LiveKit Signaling docs"
 ```
 
 ## How to use
@@ -58,4 +57,5 @@ flowchart LR
 - Recording / RTMP Ingest: optional components that capture streams for storage or broadcast.
 - Storage: object stores (S3, GCS) used for saving recordings, logs, and assets.
 
+You can expand this diagram with swimlanes, more detailed subgraphs, or use `graph TD` for layered flows.
 You can expand this diagram with swimlanes, more detailed subgraphs, or use `graph TD` for layered flows.
