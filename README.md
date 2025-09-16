@@ -18,29 +18,81 @@ Architecture documents included
 - `docs/webrtc-architecture.md` — WebRTC session-level overview, signaling and ICE responsibilities.
 - `docs/elevenlabs-v3-architecture.md` — ElevenLabs TTS/embedding flow, API considerations and example sequences.
 
-Quick start (Windows PowerShell)
---------------------------------
-1. Run the setup script to install Python and create a `ai-dev` virtual environment (PowerShell will request permission):
+# Quick Start Guide: AI Agent (Jarvis)
 
-```powershell
-.
-scripts\setup_python_and_venv.ps1
+This guide provides the steps to set up and run the local "Jarvis" AI agent on Windows using PowerShell, as specified in the project's `README.md` [1, 2].
+
+---
+
+## Prerequisites
+
+- Windows with PowerShell.  
+- Git installed.  
+- Your ElevenLabs API key.  
+
+---
+
+## Step 1: Clone the Repository
+
+If you haven't already, clone the `artificial-intelligence` repository to your local machine.
+
+```bash
+git clone https://github.com/Archit3115/artificial-intelligence.git
+cd artificial-intelligence
 ```
 
-2. Activate the venv and install the Python requirements:
+---
+
+## Step 2: Set Up Python and Virtual Environment
+
+This project includes a helper script to install a project-local version of Python and create a virtual environment named **ai-dev**.  
+Run the following command in PowerShell. You may be prompted for administrative permissions to proceed.
+
+```powershell
+. scripts\setup_python_and_venv.ps1
+```
+
+---
+
+## Step 3: Set Your ElevenLabs API Key
+
+The agent requires your ElevenLabs API key to generate speech. Set it as an environment variable for your current PowerShell session. Replace `"your_key_here"` with your actual key.
+
+```powershell
+$env:ELEVEN_API_KEY="your_key_here"
+```
+
+> **Note**: This variable is only set for the current terminal session. You will need to set it again if you open a new terminal.
+
+---
+
+## Step 4: Activate Environment and Install Dependencies
+
+Activate the virtual environment and install the required Python packages from the `requirements.txt` file.  
+The `Set-ExecutionPolicy` command may be needed to allow the activation script to run.
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.
-ai-dev\Scripts\Activate.ps1
+. .\ai-dev\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 ```
 
-3. Run the starter example:
+---
+
+## Step 5: Run the Jarvis Agent
+
+With the environment set up and dependencies installed, you can now run the agent. The main script is located in the `src/` directory, which is the designated location for the starter CLI and example code.
 
 ```powershell
 python -m src.main
 ```
+
+The agent will start, greet you, and begin listening for your commands through your microphone.
+
+---
+
+This guide is based on the instructions provided in the [Archit3115/artificial-intelligence](https://github.com/Archit3115/artificial-intelligence) repository.
+
 
 Working with diagrams
 ---------------------
