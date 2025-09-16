@@ -11,3 +11,6 @@ Suggested subfolders:
 Python starter:
 - `src/main.py` : simple CLI starter
 - `requirements.txt` : placeholder dependencies
+
+Architecture diagrams:
+- `docs/livekit-architecture.md` : LiveKit architecture visualized with Mermaid.js
