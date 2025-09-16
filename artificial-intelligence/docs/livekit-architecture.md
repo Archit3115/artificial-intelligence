@@ -1,3 +1,86 @@
+# LiveKit + ElevenLabs Architecture
+
+This document describes a production-ready architecture for a real-time voice agent using LiveKit (WebRTC) and ElevenLabs' speech models. It includes a Mermaid diagram, component notes, and a typical interaction flow.
+
+## Key technologies
+
+- **WebRTC** — real-time media transport (RTCPeerConnection, MediaStream, RTCDataChannel)
+- **LiveKit** — scalable SFU, SDKs, and server APIs/webhooks
+- **ElevenLabs** — high-quality speech synthesis (use `eleven_flash_v2_5` for low-latency scenarios)
+
+## Architecture diagram (Mermaid)
+
+The diagram below shows the high-level components and main data flows.
+
+```mermaid
+flowchart TD
+  subgraph ClientApp[Client Application - Web & Mobile]
+    A[User Browser / App]
+    SDK[LiveKit Client SDK]
+    A --> SDK
+  end
+
+  subgraph Backend[Backend Infrastructure]
+    B[Application Server]
+    C[Auth Service]
+    D[AI Agent]
+    E[ElevenLabs Adapter]
+    F[LiveKit Management API]
+    B --> C
+    B --> D
+    D --> E
+    B --> F
+  end
+
+  subgraph LiveKit[LiveKit Platform]
+    G[LiveKit SFU]
+    H[API / Webhooks]
+    I[Egress / Ingress]
+    G --> I
+  end
+
+  subgraph External[External Services]
+    J[ElevenLabs API]
+  end
+
+  %% Connections
+  SDK -->|WSS token| G
+  C -->|Access token| SDK
+  SDK -->|publish tracks| G
+  G -->|subscribe tracks| SDK
+
+  F --> H
+  H --> G
+  D -->|publish AI audio| G
+  E -->|HTTP/WS| J
+  J --> E
+
+  classDef client fill:#E3F2FD,stroke:#0D47A1;
+  classDef server fill:#E8F5E9,stroke:#1B5E20;
+  classDef infra fill:#FFF3E0,stroke:#E65100;
+  classDef storage fill:#F3E5F5,stroke:#6A1B9A;
+```
+
+## Component notes
+
+- **Auth Service**: Issues time-limited LiveKit tokens that identify users and grant room permissions.
+- **AI Agent**: Backend process that can join rooms as a participant, subscribe to user audio, and publish synthesized audio responses.
+- **ElevenLabs Adapter**: Handles API calls to ElevenLabs and transforms results into audio tracks for publishing.
+
+## Typical flow
+
+1. Client requests a LiveKit token from the Application Server.
+2. Client connects to LiveKit SFU using the token (WSS) and establishes a WebRTC PeerConnection.
+3. Client publishes local microphone/audio tracks to the SFU.
+4. Backend spawns or signals an AI Agent to join the same room.
+5. AI Agent subscribes to the user's audio, processes/transcribes it, generates a response, and sends text to ElevenLabs.
+6. ElevenLabs returns synthesized audio, which the AI Agent publishes back to the LiveKit room.
+7. Clients subscribed to the AI Agent hear the generated audio in real time.
+
+## Tips
+
+- Use the Mermaid CLI (`mmdc`) in CI to export the diagram to PNG/SVG for a consistent preview.
+- Keep node labels short to avoid parser issues.
 Architecture Overview: LiveKit, ElevenLabs v3 & WebRTC
 
 This document outlines the architecture of a real-time communication system utilising the LiveKit platform, which is built on WebRTC, and integrates with ElevenLabs' v3 speech synthesis models for advanced AI-driven audio experiences.
