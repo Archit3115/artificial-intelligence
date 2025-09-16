@@ -29,10 +29,6 @@ flowchart LR
 
   A -->|Websocket/WSS| Sig
   B -->|Websocket/WSS| Sig
-  ---
-  title: LiveKit Architecture
-  ---
-
   # LiveKit Architecture (Mermaid)
 
   This document shows a concise, easy-to-read diagram of a typical LiveKit deployment. The diagram highlights the main components and the primary media/signaling flows:
