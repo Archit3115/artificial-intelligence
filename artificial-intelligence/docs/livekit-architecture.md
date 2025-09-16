@@ -100,7 +100,6 @@ flowchart TD
     SFU_Node -->|select different layer| F["Subscriber 2"]
   end
 ```
-
 ---
 
 ### 4) Multi-node routing and Redis mesh
