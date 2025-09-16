@@ -84,7 +84,7 @@ sequenceDiagram
 
 ### 3) Simulcast + layer selection (Video quality adaptation)
 ```mermaid
-lowchart TD
+flowchart TD
   subgraph Publisher
     A(Camera) -->|encodes| B[Simulcast L0 (low)]
     A -->|encodes| C[Simulcast L1 (med)]
