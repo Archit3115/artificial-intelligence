@@ -195,11 +195,13 @@ sequenceDiagram
     Note right of LiveKitServer: Verifies the JWT signature and permissions.
 
     alt Connection Successful
-        LiveKitServer-->>-Client: 5. Connection Acknowledged
+        LiveKitServer-->>Client: 5. Connection Acknowledged
         Note right of Client: WebSocket connection is established.<br/>WebRTC negotiation begins.
     else Connection Failed
-        LiveKitServer-->>-Client: 5. Connection Rejected (e.g., invalid token)
+        LiveKitServer-->>Client: 5. Connection Rejected (e.g., invalid token)
     end
+
+    deactivate LiveKitServer
 ```
 
 ### Join → Publish → Subscribe
