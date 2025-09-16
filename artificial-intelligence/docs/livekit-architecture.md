@@ -178,27 +178,27 @@ sequenceDiagram
 
 ### System architecture
 ```mermaid
-flowchart LR
-  subgraph Clients
-    A[Browser SDK]
-    B[iOS/Android SDK]
-  end
-  subgraph AppLayer
-    AppServer[Your App Server (issue tokens)]
-  end
-  subgraph LiveKitCluster
-    LK1[LiveKit Node 1]
-    LK2[LiveKit Node 2]
-    Redis[(Redis)]
-    TURN[(TURN)]
-  end
-  A -->|WebSocket + Token| LK1
-  B -->|WebSocket + Token| LK2
-  AppServer -->|JWT / REST| LK1
-  LK1 --- Redis
-  LK2 --- Redis
-  LK1 --- TURN
-  LK2 --- TURN
+    flowchart LR
+    subgraph Clients
+        A[Browser SDK]
+        B[iOS/Android SDK]
+    end
+    subgraph AppLayer
+        AppServer[Your App Server (issue tokens)]
+    end
+    subgraph LiveKitCluster
+        LK1[LiveKit Node 1]
+        LK2[LiveKit Node 2]
+        Redis[(Redis)]
+        TURN[(TURN)]
+    end
+    A -->|WebSocket + Token| LK1
+    B -->|WebSocket + Token| LK2
+    AppServer -->|JWT / REST| LK1
+    LK1 --- Redis
+    LK2 --- Redis
+    LK1 --- TURN
+    LK2 --- TURN
 ```
 
 ### Join → Publish → Subscribe
