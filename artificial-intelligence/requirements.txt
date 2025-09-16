@@ -1,5 +1,13 @@
-# Add your Python dependencies here
-numpy
-requests
-networkx
-matplotlib
+# requirements.txt
+# Existing dependencies from your repo would be here
+
+# For interacting with ElevenLabs API
+elevenlabs
+
+# For real-time audio input/output
+sounddevice
+soundfile
+pyaudio
+
+# For speech recognition
+SpeechRecognition
