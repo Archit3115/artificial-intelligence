@@ -84,24 +84,32 @@ sequenceDiagram
 
 ### 3) Simulcast + layer selection (Video quality adaptation)
 ```mermaid
-graph TD
-  subgraph "Publisher"
-    A[Camera] -->|encodes| B[Simulcast L0 (low)]
-    A -->|encodes| C[Simulcast L1 (med)]
-    A -->|encodes| D[Simulcast L2 (high)]
-  end
+sequenceDiagram
+    actor Publisher
+    participant LiveKit_SFU as LiveKit SFU
+    participant Subscriber1 as Subscriber 1 (Good Network)
+    participant Subscriber2 as Subscriber 2 (Poor Network)
 
-  subgraph "LiveKit SFU (Media Server)"
-    B -->|RTP Stream| SFU_Node
-    C -->|RTP Stream| SFU_Node
-    D -->|RTP Stream| SFU_Node
-    SFU_Node[LiveKit SFU]
-  end
+    Publisher->>+LiveKit_SFU: Connects and starts publishing media
+    Note over Publisher,LiveKit_SFU: Publisher encodes video into multiple quality layers (L0, L1, L2) and sends them as RTP streams.
 
-  subgraph "Subscribers"
-    SFU_Node -->|Selects L2 (Good Network)| E["Subscriber 1 (Desktop)"]
-    SFU_Node -->|Selects L0 (Poor Network)| F["Subscriber 2 (Mobile)"]
-  end
+    loop Simulcast Streams
+        Publisher->>LiveKit_SFU: Sends Simulcast Layer L0 (low quality)
+        Publisher->>LiveKit_SFU: Sends Simulcast Layer L1 (medium quality)
+        Publisher->>LiveKit_SFU: Sends Simulcast Layer L2 (high quality)
+    end
+
+    LiveKit_SFU->>+Subscriber1: Forwards media stream
+    Note right of LiveKit_SFU: LiveKit SFU assesses Subscriber 1's bandwidth and determines it can handle high quality.
+    LiveKit_SFU->>Subscriber1: Selects and sends Layer L2 (high)
+
+    LiveKit_SFU->>+Subscriber2: Forwards media stream
+    Note right of LiveKit_SFU: LiveKit SFU assesses Subscriber 2's bandwidth and determines it can only handle low quality.
+    LiveKit_SFU->>Subscriber2: Selects and sends Layer L0 (low)
+
+    deactivate Publisher
+    deactivate Subscriber1
+    deactivate Subscriber2
 ```
 
 ---
