@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Wrapper hook: prefer PowerShell hook on Windows, otherwise run a POSIX check.
+HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
+if command -v pwsh >/dev/null 2>&1; then
+  pwsh -NoProfile -ExecutionPolicy Bypass -File "$HOOK_DIR/pre-commit.ps1"
+  rc=$?
+  exit $rc
+elif command -v powershell >/dev/null 2>&1; then
+  powershell -NoProfile -ExecutionPolicy Bypass -File "$HOOK_DIR/pre-commit.ps1"
+  rc=$?
+  exit $rc
+else
+  # POSIX fallback: block commit when files have lowercase index flags
+  if git ls-files -v | grep -E '^[a-z]' >/dev/null 2>&1; then
+    echo "ERROR: Some tracked files are marked assume-unchanged or skip-worktree. Clear them with 'git update-index --no-assume-unchanged <file>' or 'git update-index --no-skip-worktree <file>'" >&2
+    git ls-files -v | grep -E '^[a-z]' >&2
+    exit 1
+  fi
+fi
+
+exit 0
