@@ -178,27 +178,28 @@ sequenceDiagram
 
 ### System architecture
 ```mermaid
-    flowchart LR
-    subgraph Clients
-        A[Browser SDK]
-        B[iOS/Android SDK]
+    sequenceDiagram
+    participant Client as Client (Browser/Mobile SDK)
+    participant AppServer as Your App Server
+    participant LiveKitServer as LiveKit Server Node
+
+    Client->>+AppServer: 1. Request to join a room
+    Note right of Client: User wants to connect to a specific<br/>LiveKit room (e.g., 'my-room').
+    AppServer->>-Client: 2. Return Access Token (JWT)
+    Note left of AppServer: Server verifies user identity and generates<br/>a signed JWT token with permissions.
+
+    Client->>+LiveKitServer: 3. Connect (WebSocket) with Token
+    Note over Client,LiveKitServer: The LiveKit SDK initiates a secure WebSocket<br/>connection to the LiveKit Server.
+
+    LiveKitServer->>LiveKitServer: 4. Validate Token
+    Note right of LiveKitServer: Verifies the JWT signature and permissions.
+
+    alt Connection Successful
+        LiveKitServer-->>-Client: 5. Connection Acknowledged
+        Note right of Client: WebSocket connection is established.<br/>WebRTC negotiation begins.
+    else Connection Failed
+        LiveKitServer-->>-Client: 5. Connection Rejected (e.g., invalid token)
     end
-    subgraph AppLayer
-        AppServer[Your App Server (issue tokens)]
-    end
-    subgraph LiveKitCluster
-        LK1[LiveKit Node 1]
-        LK2[LiveKit Node 2]
-        Redis[(Redis)]
-        TURN[(TURN)]
-    end
-    A -->|WebSocket + Token| LK1
-    B -->|WebSocket + Token| LK2
-    AppServer -->|JWT / REST| LK1
-    LK1 --- Redis
-    LK2 --- Redis
-    LK1 --- TURN
-    LK2 --- TURN
 ```
 
 ### Join → Publish → Subscribe
