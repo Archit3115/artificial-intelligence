@@ -1,3 +1,5 @@
 # Add your Python dependencies here
 numpy
 requests
+networkx
+matplotlib
