@@ -84,18 +84,20 @@ sequenceDiagram
 
 ### 3) Simulcast + layer selection (Video quality adaptation)
 ```mermaid
-flowchart TD
+lowchart TD
   subgraph Publisher
     A(Camera) -->|encodes| B[Simulcast L0 (low)]
     A -->|encodes| C[Simulcast L1 (med)]
     A -->|encodes| D[Simulcast L2 (high)]
   end
-  B -->|RTP| SFU
-  C -->|RTP| SFU
-  D -->|RTP| SFU
+
+  B -->|RTP| SFU_Node
+  C -->|RTP| SFU_Node
+  D -->|RTP| SFU_Node
+
   subgraph SFU
-    SFU -->|select layer per subscriber| E(Subscriber 1)
-    SFU -->|select different layer| F(Subscriber 2)
+    SFU_Node[SFU] -->|select layer per subscriber| E(Subscriber 1)
+    SFU_Node -->|select different layer| F(Subscriber 2)
   end
 ```
 
