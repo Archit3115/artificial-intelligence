@@ -1,0 +1,43 @@
+name: Render Mermaid Diagrams
+
+on:
+  push:
+    paths:
+      - 'docs/**'
+      - '.github/workflows/render-mermaid.yml'
+  workflow_dispatch: {}
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Create diagrams directory
+        run: mkdir -p docs/diagrams
+
+      - name: Extract first Mermaid block
+        run: |
+          awk 'BEGIN{found=0} /```mermaid/{found=1; next} /^```/{if(found){exit}} found{print}' docs/livekit-architecture.md > diagram.mmd
+          if [ ! -s diagram.mmd ]; then echo "No mermaid block found in docs/livekit-architecture.md"; exit 0; fi
+
+      - name: Render SVG from Mermaid
+        run: |
+          npx @mermaid-js/mermaid-cli -i diagram.mmd -o docs/diagrams/livekit-architecture.svg -w 1024
+
+      - name: Commit generated SVG
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: github-actions
+          author_email: github-actions@github.com
+          message: chore(docs): render mermaid diagram
+          add: docs/diagrams/livekit-architecture.svg
+          push: true
