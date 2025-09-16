@@ -1,4 +1,5 @@
 Architecture Overview: LiveKit, ElevenLabs v3 & WebRTC
+
 This document outlines the architecture of a real-time communication system utilising the LiveKit platform, which is built on WebRTC, and integrates with ElevenLabs' v3 speech synthesis models for advanced AI-driven audio experiences.
 1. Core Technologies
 • WebRTC (Web Real-Time Communication): This is the foundational technology that enables peer-to-peer streaming of audio, video, and arbitrary data directly between browsers and applications without needing plugins. It is optimised for media, resilient to poor network conditions, and natively supported by modern browsers. Key components include RTCPeerConnection for managing connections between peers, MediaStream for audio/video tracks, and RTCDataChannel for arbitrary data exchange.
@@ -54,35 +55,92 @@ graph TD
     style B fill:#d5e8d4,stroke:#333
     style G fill:#fff2cc,stroke:#333
     style J fill:#f8cecc,stroke:#333
-3. Detailed Component Breakdown & Flow
-Here is a step-by-step explanation of the architecture shown in the diagram.
-3.1. LiveKit Ecosystem Core Components
-• LiveKit Server: This is the central media server that routes audio, video, and data streams between participants in a 'Room'. It handles all the complex WebRTC signalling, network traversal (ICE, STUN, TURN), and media encoding/decoding management. You can use the fully managed LiveKit Cloud or self-host it on your own infrastructure.
-• LiveKit SDKs: These are developer-friendly libraries for web, mobile, and backend applications. They provide a consistent API to connect to rooms, publish media tracks (like a user's microphone), and subscribe to tracks from other participants.
-• Server APIs & Webhooks: LiveKit provides a REST API and webhooks for backend management of rooms and participants. This allows your application server to create rooms, grant access, and monitor events programmatically.
-3.2. WebRTC Layer
-• Peer-to-Peer Foundation: Although LiveKit uses a media server (SFU - Selective Forwarding Unit) to scale to many participants, the underlying transport is WebRTC. Each client establishes a secure RTCPeerConnection with the LiveKit Server.
-• Media & Data Tracks: A user's camera and microphone are captured as MediaStreamTrack objects and published to the server. Other participants subscribe to these tracks. Arbitrary data can be sent via RTCDataChannel for things like text chat or game state synchronisation.
-• Signalling: The process of setting up a WebRTC connection involves exchanging session descriptions (SDP) and network candidate information (ICE). LiveKit's SDKs and Server handle this entire negotiation process, abstracting it away from the developer.
-3.3. ElevenLabs Integration
-• Model Selection: The choice of ElevenLabs model is critical and depends on the use case.
-    ◦ eleven_v3: Best for high-quality, non-real-time audio generation like narrations or character dialogues that can be pre-rendered. It has a high emotional range but is not suitable for low-latency conversational agents.
-    ◦ eleven_flash_v2_5: The recommended choice for real-time applications like voice agents due to its ultra-low latency (~75ms).
-    ◦ eleven_turbo_v2_5: A balanced model offering higher quality than Flash with low latency (~250-300ms).
-• API Interaction: Your backend's AI Agent logic would make requests to the ElevenLabs API (either via HTTP or WebSockets for lower latency). For a conversational agent, the flow would be:
-    1. The AI logic determines a response.
-    2. It sends the text to the ElevenLabs API (e.g., using the Flash v2.5 model).
-    3. ElevenLabs returns the synthesised audio stream.
-    4. The backend agent, connected to the LiveKit room as a participant, publishes this audio stream as a MediaStreamTrack for other participants to hear.
-3.4. Architectural Flow in Practice
-1. Authentication: A user's client app requests access from your Application Server. The server verifies the user and generates a time-limited LiveKit Access Token specifying the user's identity and the room they can join.
-2. Connection: The client-side LiveKit SDK uses this token to establish a secure WebSocket connection to the LiveKit Server, which then negotiates a WebRTC peer connection.
-3. Publishing Media: The client publishes its local audio and video tracks to the LiveKit Server.
-4. AI Agent Joins: Your backend spawns an AI Agent. This agent uses a server-side LiveKit SDK and another access token to join the same room as a participant.
-5. Real-time Interaction:
-    ◦ The AI Agent subscribes to the user's audio track.
-    ◦ The audio is processed (e.g., transcribed to text).
-    ◦ The AI logic formulates a text response.
-    ◦ This text is sent to the ElevenLabs API (e.g., Flash v2.5 model).
-    ◦ The returned audio stream is published by the AI Agent back into the LiveKit room.
-6. Receiving Media: The user's client app automatically subscribes to the AI Agent's newly published audio track and plays it back, completing the conversational loop. All media is routed efficiently through the LiveKit Server.
+---
+title: LiveKit + ElevenLabs Architecture
+---
+
+# LiveKit + ElevenLabs Architecture
+
+This document describes a production-ready architecture for a real-time voice agent using LiveKit (WebRTC) and ElevenLabs' speech models. It includes a clear Mermaid diagram, component breakdown, and an example interaction flow.
+
+## Key technologies
+
+- **WebRTC**: Real-time media transport (RTCPeerConnection, MediaStream, RTCDataChannel).
+- **LiveKit**: Scalable WebRTC SFU and SDKs for building rooms, publishing/subscribing to media, and server APIs/webhooks.
+- **ElevenLabs**: High-quality speech synthesis (use `eleven_flash_v2_5` for low-latency real-time scenarios).
+
+## Architecture diagram (Mermaid)
+
+The diagram below shows the high-level components and main data flows.
+
+```mermaid
+graph TD
+    subgraph ClientApp[Client Application (Web / Mobile)]
+        A[User Browser / App]
+        SDK[LiveKit Client SDK]
+        A --> SDK
+    end
+
+    subgraph Backend[Your Backend Infrastructure]
+        B[Application Server]
+        C[Auth Service]
+        D[AI Agent]
+        E[ElevenLabs Integration]
+        F[LiveKit Management API]
+        B --> C
+        B --> D
+        D --> E
+        B --> F
+    end
+
+    subgraph LiveKit[LiveKit Platform]
+        G[LiveKit SFU / Media Server]
+        H[API / Webhooks]
+        I[Egress / Ingress]
+        G --> I
+    end
+
+    subgraph External[External Services]
+        J[ElevenLabs API]
+    end
+
+    %% Connections
+    SDK -->|WSS (token)| G
+    C -->|Access Token| SDK
+    SDK -->|publish tracks| G
+    G -->|subscribe tracks| SDK
+
+    F --> H
+    H --> G
+    D -->|publish AI audio| G
+    E -->|HTTP/WS| J
+    J --> E
+
+    classDef client fill:#E3F2FD,stroke:#0D47A1;
+    classDef server fill:#E8F5E9,stroke:#1B5E20;
+    classDef infra fill:#FFF3E0,stroke:#E65100;
+    classDef storage fill:#F3E5F5,stroke:#6A1B9A;
+```
+
+## Component notes
+
+- **Auth Service**: Issues time-limited LiveKit tokens that identify users and grant room permissions.
+- **AI Agent**: Backend process that can join rooms as a participant, subscribe to user audio, and publish synthesized audio responses.
+- **ElevenLabs Integration**: Calls ElevenLabs' API to synthesize audio; choose `eleven_flash_v2_5` for low-latency use cases.
+
+## Typical flow
+
+1. Client requests a LiveKit token from `Application Server`.
+2. Client connects to LiveKit SFU using the token (WSS) and establishes a WebRTC PeerConnection.
+3. Client publishes local microphone/audio tracks to the SFU.
+4. Backend spawns or signals an `AI Agent` to join the same room.
+5. `AI Agent` subscribes to the user's audio, processes/transcribes it, generates a response, and sends text to ElevenLabs.
+6. ElevenLabs returns synthesized audio, which the `AI Agent` publishes back to the LiveKit room.
+7. Clients subscribed to the AI Agent hear the generated audio in real time.
+
+## Tips
+
+- For deterministic rendering or export, use the Mermaid CLI (`mmdc`) in CI to generate PNG/SVG images of the diagram.
+- Keep node labels short in Mermaid; avoid nested parentheses and slashes where possible to reduce parser issues.
+
+*** End Patch
